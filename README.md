@@ -18,12 +18,14 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-
-
+### Download
+You can download the latest version of the plugin from [here](https://github.com/ratanparai/cinehub24/releases)
 
 
 ### Authors and Contributors
 cinehub24 and themoviedatabase scrabber is created by @ratanparai to use in the addon. 
 
 ### Support or Contact
-If you are having trouble or find any bug feel free to report them via [issue](https://github.com/ratanparai/cinehub24/issues) page. You can follow me on twitter [@ratanparai](http://twitter.com/ratanparai)
+If you are having trouble or find any bug feel free to report them via [issue](https://github.com/ratanparai/cinehub24/issues) page. 
+
+Follow me on twitter [@ratanparai](http://twitter.com/ratanparai)
