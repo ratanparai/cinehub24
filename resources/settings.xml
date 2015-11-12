@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings>
+	<category label="cinehub24 account">
+	    <setting label="username" id="user_name" type="text" default="" />
+	    <setting label="password" id="user_password" type="text" default="" option="hidden"/>
+	</category>
+	<category label="Library">
+		<setting label="Movie Library" id="movie_library" type="folder" default="special://userdata/addon_data/plugin.video.cinehub/Movies" />
+	</category>
+</settings>

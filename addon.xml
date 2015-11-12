@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="plugin.video.cinehub" name="Cinehub24" version="1.1.10" provider-name="Ratan Sunder Parai">
+	<requires>
+		<import addon="xbmc.python" version="2.1.0" />
+		<import addon="script.module.requests" version="1.1.0"/>
+		<import addon="script.module.beautifulsoup" version="2.2.1" />
+		<import addon="script.module.simplejson" version="1.0.0 "/>
+	</requires>
+	<extension point="xbmc.python.pluginsource" library="addon.py">
+		<provides>video</provides>
+	</extension>
+	<extension point="xbmc.addon.metadata">
+		<summary lang="en">Unofficial cinehub24 plugin </summary>
+		<description lang="en">This plugin stream movie from cinehub24. You must be a Link3 user and must have chinehub24 id to use this plugin. It is still in beta phase. please report bugs in https://github.com/ratanparai/cinehub24
+			features:
+			- search movies
+			- browse recent movies
+			- add movie to library
+			- trakt scrobbling
+		</description>
+		<disclaimer lang="en">You need to be Link3 user and must have cinehub24 account id to use this plugin</disclaimer>
+		<platform>all</platform>
+		<website>https://github.com/ratanparai/cinehub24</website>
+		<email>ratanparai@gmail.com</email>
+	</extension>
+</addon>

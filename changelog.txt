@@ -1,0 +1,6 @@
+1.1.10
+-movie search
+-add to library
+-bug fix 
+
+1.0.0 Initial Release
