@@ -23,7 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 
 ### Authors and Contributors
-cinehub24 and themoviedatabase scrabber is created by @ratanparai. Those can be used in your own addon if you wish with proper 
+cinehub24 and themoviedatabase scrabber is created by @ratanparai to use in the addon. 
 
 ### Support or Contact
-Having trouble with Pages? Check out our [documentation](https://help.github.com/pages) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+If you are having trouble or find any bug feel free to report them via [issue](https://github.com/ratanparai/cinehub24/issues) page. You can follow me on twitter [@ratanparai](http://twitter.com/ratanparai)
