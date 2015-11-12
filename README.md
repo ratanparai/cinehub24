@@ -31,4 +31,5 @@ cinehub24 and themoviedatabase scrabber is created by @ratanparai to use in the 
 If you are having trouble or find any bug feel free to report them via [issue](https://github.com/ratanparai/cinehub24/issues) page. 
 
 Follow me on twitter [@ratanparai](http://twitter.com/ratanparai)
+
 [Website](http://ratanparai.github.io/cinehub24/)
