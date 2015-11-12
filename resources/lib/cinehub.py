@@ -122,18 +122,19 @@ class cinehub:
         for i in range(1,5):
             try:
                 tempName =  linkTable.find('tbody').findAll('td')[tdId].find('b').string
-                #print tempName
+                
+                # get downloadable link
+                tempVideoLink = linkTable.find('tbody').findAll('td')[tdId+3].find('a')['href']
+                result = session.get(tempVideoLink).content    
+                soup = BeautifulSoup(result)
+                link =  soup.find('div', attrs={'id': 'download_btn_r'}).find('a')['href'].strip()
                 
                 # video file format mp4, avi and mkv and not containing sample
-                if tempName.find('.mp4') != -1 or tempName.find('.avi') != -1 or tempName.find('.mkv') != -1 :
-                    if tempName.lower().find("sample") != -1 or tempName.lower().find("trailer") != -1 :
+                if link.lower().endswith(('mp4' , 'avi' , 'mkv')) :
+                    if link.lower().find("sample") != -1 or link.lower().find("trailer") != -1 :
                         pass
                     else:
-                        tempVideoLink = linkTable.find('tbody').findAll('td')[tdId+3].find('a')['href']
-                        result = session.get(tempVideoLink).content    
-                        soup = BeautifulSoup(result)
-                        link =  soup.find('div', attrs={'id': 'download_btn_r'}).find('a')['href']
-                        return link.strip()
+                        return link
                 else:
                     tdId += 5
             except:
