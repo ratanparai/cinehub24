@@ -1,7 +1,7 @@
 # cinehub24
 Kodi/XBMC video plugin for cinehub24
 
-### cinehub24 for kodi
+
 Copyright (C) 2015  Ratan Sunder Parai
 
 This program is free software; you can redistribute it and/or modify
@@ -31,3 +31,4 @@ cinehub24 and themoviedatabase scrabber is created by @ratanparai to use in the 
 If you are having trouble or find any bug feel free to report them via [issue](https://github.com/ratanparai/cinehub24/issues) page. 
 
 Follow me on twitter [@ratanparai](http://twitter.com/ratanparai)
+[Website](http://ratanparai.github.io/cinehub24/)
