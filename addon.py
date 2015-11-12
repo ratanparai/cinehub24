@@ -102,7 +102,7 @@ def showMoviesList(page=1):
     xbmcplugin.setContent(addon_handle, 'movies')
     
     myHub = cinehub()
-    listOfMovies = myHub.getMyMovieInfoList(page)
+    listOfMovies = myHub.getRecentMovieList(page)
     
     listing = []
     
@@ -140,7 +140,6 @@ def showMoviesList(page=1):
         # add contex menu
         cm =[]
         msg = 'RunPlugin({0}?action=addToLibrary&title={1}&year={2}&url={3})'.format(__url__,  urllib.quote_plus(movie.title), movie.year, movie.url)
-        print "plugin.video.cinehub: " + msg
         cm.append(('Add To Library', msg))
         li.addContextMenuItems(cm, False)
         
@@ -172,7 +171,6 @@ def router(paramstring):
             showMoviesList()
             
         elif params['action'] == 'search':
-            print 'another action'
             try:
                 k = xbmc.Keyboard('', 'Search Movies', False)
                 k.doModal()
@@ -182,9 +180,7 @@ def router(paramstring):
                     return
                 
                 mHub = cinehub()
-                mInfo = mHub.searchMovies(query)
-                print "accepted movie count"
-                print len(mInfo)
+                mInfo = mHub.getSearchedMovieList(query)
                 showSearchResult(mInfo)
             except:
                 return
@@ -256,12 +252,11 @@ def play_stream(title, year, path):
     # get movie info
     mInfo = movieinfo()
     
-    print "name received via stream : " + title
-    mInfo.name = title
-    mInfo.year = year
+    # generate name
+    name = '%s (%s)' % (title, str(year))
     
     scrobber = tmdbscraper()
-    movie = scrobber.getMovieInfo(mInfo)
+    movie = scrobber.getMovieInfo(name)
     
     info = {
             'genre': movie.genres,
@@ -284,7 +279,7 @@ def play_stream(title, year, path):
     play_item.setInfo('video', info)
     
     
-    play_item.setArt({ 'poster': movie.posterImage, 'fanart' : movie.backdropImage, 'thumb' : movie.posterImage })
+    play_item.setArt({'thumb' : movie.posterImage })
     
     # Pass the item to the Kodi player.
     xbmcplugin.setResolvedUrl(addon_handle, True, listitem=play_item)

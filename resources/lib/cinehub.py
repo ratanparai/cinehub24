@@ -18,63 +18,41 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
+from movieinfo import movieinfo
 from urllib import urlopen
 from BeautifulSoup import BeautifulSoup
 import requests
-from movieinfo import movieinfo
-from tmdbscraper import tmdbscraper
-import xbmcaddon
 import urllib
-import base64
+from tmdbscraper import tmdbscraper
+import threading
+import xbmcaddon
 
 class cinehub:
     
-    # Perform login task and return request.session() object
-    def login(self):
+    # movie list
+    movieList = []
+     
+    # function to call the getMovieList with appropiate URL and page number
+    def getSearchedMovieList(self, movieName):
+        # create url
+        url = "http://www.cinehub24.com/search/%s.aspx" % urllib.quote_plus(movieName)
         
-        # Login url 
-        loginUrl = "http://www.cinehub24.com/auth/login"
-        
-        myAddon = xbmcaddon.Addon()
-        
-        
-        USERNAME = myAddon.getSetting("user_name")
-        PASSWORD = myAddon.getSetting("user_password")
-        
+        return self.getMovieList(url)
 
+    
+    # function to call the getMovieList with appropiate URL and page number
+    def getRecentMovieList(self, page):
+        # create url
+        url = "http://www.cinehub24.com/net/section/english-movie/onlineContent.aspx/%s" % str(page)
+
+        return self.getMovieList(url)
         
-        if USERNAME == "" or PASSWORD == "" :
-            myAddon.openSettings()
-        
-        session_requests = requests.session()
-    
-        # Create payload
-        payload = {
-            "user_name": USERNAME, 
-            "user_password": PASSWORD,
-            'doLogin' : 'true',
-            'submit' : 'Login' 
-        }
-    
-        # Perform login
-        result = session_requests.post(loginUrl, data = payload, headers = dict(referer = loginUrl))
-        
-        # check if login successfull
-        # TODO
-        
-        return session_requests
-    
-    def getAllMovieList(self, session, page=1):
-        URL = "http://www.cinehub24.com/net/section/english-movie/onlineContent.aspx/" + str(page)
-        return self.getMovieList(session, URL, page)
-    
-    
-    def getMovieList(self, session, URL, page = 1 ): 
-        # url for all movie list
-        #URL = "http://www.cinehub24.com/net/section/english-movie/onlineContent.aspx/" + str(page)
+    def getMovieList(self, url):
+        # get session for authorize url call
+        session = self.doLogin()
         
         # get the html 
-        result = session.get(URL).content
+        result = session.get(url).content
         
         # make it ready for scraping
         soup = BeautifulSoup(result)
@@ -82,36 +60,54 @@ class cinehub:
         # get movie list box
         movieBoxs = soup.findAll('div', attrs={'class': ['movie-list-hldr' , 'movie-list-hldr movielist-active']})
         
-        
-        
-        movielist = []
+        # list of threads
+        threads = []
         
         for movieBox in movieBoxs:
             # movie link 
             movieLink = movieBox.find('div', attrs={'class' : 'movie-list-des'}).find('a')
-            #print movieLink['href']
             
             # get real movie links
             links = movieLink['href']
+            # get movie title
+            movieTitle = movieLink.find('b').string
             
-            minfo = movieinfo()
-           
-            minfo.url = self.getVideoLink(session, links)
+            # start thread job
+            t = threading.Thread(target=self.worker, args=(movieTitle, links, session))
             
-            #self.getVideoLink(session, links)
+            # append to threads so that can be stopped later
+            threads.append(t)
             
-            if minfo.url :   
-                
-                #movie title
-                movieTitle = movieLink.find('b')
-                #print movieTitle.string
-                minfo.name = movieTitle.string
-                
-                movielist.append(minfo)
+            # start thread
+            t.start()
+        
+        # stop thread job
+        for t in threads:
+            t.join() 
                 
     
-        return movielist
+        return self.movieList
     
+    def worker(self, name, url, session):
+        resolvedUrl = self.getVideoLink(session, url)
+        
+        # if resolvedUrl is none then stop the thread and do nothing
+        if resolvedUrl == None:
+            return
+        
+        # now try to get meta info from tmdb database
+        scrapper = tmdbscraper()
+        mMovieInfo = scrapper.getMovieInfo(name)
+        
+        # add previously resolved url to the list
+        mMovieInfo.url = resolvedUrl
+        # if movie info have no imdb id then return
+        if mMovieInfo.imdbid:
+            # add the movieino object to the movie list
+            self.movieList.append(mMovieInfo)
+    
+    # get playable video link for the movie if available
+    # if no link is available then return nothing
     def getVideoLink(self, session, URL):
         
         # get html file
@@ -142,43 +138,37 @@ class cinehub:
                     tdId += 5
             except:
                 break
-            
-        
-    def getMyMovieInfoList(self, page = 1):  
-        session = self.login()
-        mymovieinfos = self.getAllMovieList(session, page) 
-        
-        movieList = []
-        
-        print "getting mymovieinfo..."
-        for mymovieinfo in mymovieinfos:
-            tScrap = tmdbscraper()
-            mymovieinfo = tScrap.getMovieInfo(mymovieinfo)
-            
-            if mymovieinfo.imdbid:
-                movieList.append(mymovieinfo)
-                print mymovieinfo.title
-        
-        return movieList
     
-    def searchMovies(self, searchTerm):
-        searchTerm = searchTerm.strip()
-        searchTerm = searchTerm.replace(" ", "+")
-        URL = "http://www.cinehub24.com/search/{0}.aspx".format(searchTerm)
+    # Login to the cinehub24 server
+    def doLogin(self):
+        # Login url 
+        loginUrl = "http://www.cinehub24.com/auth/login"
         
-        session = self.login()
-        mymovieinfos = self.getMovieList(session, URL, 1)
+        myAddon = xbmcaddon.Addon()
         
-        movieList = []
-        for mymovieinfo in mymovieinfos:
-            tScrap = tmdbscraper()
-            mymovieinfo = tScrap.getMovieInfo(mymovieinfo)
-            try:
-                if mymovieinfo.imdbid:
-                    movieList.append(mymovieinfo)
-                    print mymovieinfo.title
-            except:
-                pass
-        return movieList
-       
+        USERNAME = myAddon.getSetting("user_name")
+        PASSWORD = myAddon.getSetting("user_password")
+        
+        # if no usename or password then show setting window
+        if USERNAME == "" or PASSWORD == "" :
+            myAddon.openSettings()
+        
+        session_requests = requests.session()
+    
+        # Create payload
+        payload = {
+            "user_name": USERNAME, 
+            "user_password": PASSWORD,
+            'doLogin' : 'true',
+            'submit' : 'Login' 
+        }
+    
+        # Perform login
+        result = session_requests.post(loginUrl, data = payload, headers = dict(referer = loginUrl))
+        
+        # check if login successfull
+        # TODO
+        
+        return session_requests
+            
         

@@ -40,8 +40,12 @@ class tmdbscraper:
         
         return moviejson['results'][0]['id']
     
-    def getMovieInfo(self, myMovieInfo):
-        name = myMovieInfo.name
+    def getMovieInfo(self, name):
+        # create movieinfo object to return
+        myMovieInfo = movieinfo()
+        
+        # set file name to movieinfo object
+        myMovieInfo.name = name
         
         # delete first bracket ( from name
         name = name.replace("(", "")
@@ -69,8 +73,6 @@ class tmdbscraper:
         # invoke search
         movieId = self.searchMovie(searchName, searchYear)
         
-        print "tmdbid : " + str(movieId)
-        
         if movieId == 0 :
             return myMovieInfo
         
@@ -86,7 +88,6 @@ class tmdbscraper:
         
         # encode strings to "utf-8" becuase kodi give error while showing unicode character
         myMovieInfo.title =  mJson['title'].encode('utf-8')
-        print "title = " + myMovieInfo.title
         myMovieInfo.imdbid = mJson['imdb_id'].encode('utf-8')
         myMovieInfo.totalVote =  mJson['vote_average'] #rating
         myMovieInfo.rating = mJson['vote_count']
