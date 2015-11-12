@@ -21,6 +21,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 ### Download
 You can download the latest version of the plugin from [here](https://github.com/ratanparai/cinehub24/releases)
 
+### How to use
+You need to be a Link3 user to use this addon. You also must have an account on their cinehub24 server. Go to the addon setting and add username and password. If you want to use Library integration add the movie folder inside the userdata >addon_data > plugin.video.cinehub folder to your library. You can also change the folder location from setting if you wish. 
 
 ### Authors and Contributors
 cinehub24 and themoviedatabase scrabber is created by @ratanparai to use in the addon. 
