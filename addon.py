@@ -105,11 +105,10 @@ def showSearchResult(listOfMovies):
         
         li.setProperty('IsPlayable', 'true')
         
-        # Add to library context menu
-        cm = [] 
+        # add contex menu
+        cm =[]
         cm.append(('Movie Informatiom', 'Action(Info)'))
-        msg = 'RunPlugin({0}?action=addToLibrary&title={1}&year={2}&url={3})'.format(__url__,  urllib.quote_plus(movie.title), movie.year, movie.url)
-        print "plugin.video.cinehub: " + msg
+        msg = 'RunPlugin({0}?action=addToLibrary&imdbid={1}&title={2}&year={3}&url={4})'.format(__url__, movie.imdbid, urllib.quote_plus(movie.title), movie.year, movie.url)
         cm.append(('Add To Library', msg))
         li.addContextMenuItems(cm, False)
         
