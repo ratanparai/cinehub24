@@ -36,3 +36,8 @@ class movieinfo:
     writer = ''
     director = ''
     castandrole = []
+    trailer = ''
+    
+    # For sorting back to the result was returned before going into thread
+    sortid = ''
+    

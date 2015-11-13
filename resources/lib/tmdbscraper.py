@@ -78,6 +78,8 @@ class tmdbscraper:
         myMovieInfo.writer = result[13]
         myMovieInfo.director = result[14]
         myMovieInfo.castandrole = eval(result[15])
+        myMovieInfo.trailer = result[16]
+        
         
         return myMovieInfo
     
@@ -159,11 +161,16 @@ class tmdbscraper:
         
         CREDIT_URL = "http://api.themoviedb.org/3/movie/"+ str(movieId) + "/credits?api_key="+ self.API
         
+        TRAILER_URL = "http://api.themoviedb.org/3/movie/%s/videos?api_key=%s" %(str(movieId), self.API)
+        
         result = urlopen(DETAIL_URL)
         mJson = json.load(result)
         
         creditResult = urlopen(CREDIT_URL)
-        cJson = json.load(creditResult)     
+        cJson = json.load(creditResult) 
+        
+        trailerResult = urlopen(TRAILER_URL)
+        tJson = json.load(trailerResult)    
         
         # encode strings to "utf-8" becuase kodi give error while showing unicode character
         myMovieInfo.title =  mJson['title'].encode('utf-8')
@@ -200,6 +207,11 @@ class tmdbscraper:
         except:
             pass
         
+        try:
+            myMovieInfo.trailer = str(tJson['results'][0]['key'])
+        except:
+            pass
+        
         if cJson.has_key('cast'):
             listCast = cJson['cast']
             
@@ -219,11 +231,11 @@ class tmdbscraper:
     
     def saveMovieCache(self, myMovieInfo, url):
         print "save movie info to database"
-        t = (url ,myMovieInfo.title ,myMovieInfo.imdbid ,str(myMovieInfo.genres) ,myMovieInfo.rating ,myMovieInfo.runtime ,myMovieInfo.tagline ,myMovieInfo.totalVote ,myMovieInfo.releaseDate ,myMovieInfo.overview ,myMovieInfo.posterImage ,myMovieInfo.backdropImage ,myMovieInfo.year ,myMovieInfo.writer ,myMovieInfo.director , str(myMovieInfo.castandrole))
+        t = (url ,myMovieInfo.title ,myMovieInfo.imdbid ,str(myMovieInfo.genres) ,myMovieInfo.rating ,myMovieInfo.runtime ,myMovieInfo.tagline ,myMovieInfo.totalVote ,myMovieInfo.releaseDate ,myMovieInfo.overview ,myMovieInfo.posterImage ,myMovieInfo.backdropImage ,myMovieInfo.year ,myMovieInfo.writer ,myMovieInfo.director , str(myMovieInfo.castandrole), str(myMovieInfo.trailer))
         insertQuery = '''INSERT INTO movie_info
-                    (url ,title ,imdbid ,genres ,rating ,runtime ,tagline ,totalVote ,releaseDate ,overview ,posterImage ,backdropImage ,year ,writer ,director ,castandrole)
+                    (url ,title ,imdbid ,genres ,rating ,runtime ,tagline ,totalVote ,releaseDate ,overview ,posterImage ,backdropImage ,year ,writer ,director ,castandrole, trailer)
                 VALUES
-                    (? , ? , ? , ? , ? , ? , ? , ? , ? , ?, ? , ?, ?, ?, ? , ?)
+                    (? , ? , ? , ? , ? , ? , ? , ? , ? , ?, ? , ?, ?, ?, ? , ?, ?)
                     '''
         self.dbcon.text_factory = str
         self.dbcur.execute(insertQuery, t)

@@ -111,12 +111,13 @@ def showMoviesList(page=1):
         url = '{0}?action=play&video={1}'.format(__url__, movie.url)
         
         
-        bPosterImage =  "https://image.tmdb.org/t/p/w396" + movie.posterImage
-        bBackdropImage = "https://image.tmdb.org/t/p/w780" + movie.backdropImage
+        bPosterImage =  "https://image.tmdb.org/t/p/w396%s" % movie.posterImage
+        bBackdropImage = "https://image.tmdb.org/t/p/w780%s" % movie.backdropImage
+        sPosterImage = "https://image.tmdb.org/t/p/w185%s" % movie.posterImage
         
-        sPosterImage = "https://image.tmdb.org/t/p/w185" + movie.posterImage
-        
-        print "sPosterImage: " +  sPosterImage
+        trailer_url = ''
+        if movie.trailer:
+            trailer_url = 'plugin://plugin.video.youtube/play/?video_id=%s' % movie.trailer 
         
         li = xbmcgui.ListItem(label=movie.title, thumbnailImage=sPosterImage)
         
@@ -136,7 +137,8 @@ def showMoviesList(page=1):
             'votes' : movie.rating,
             'castandrole' : movie.castandrole,
             'director' : movie.director,
-            'writer' : movie.writer
+            'writer' : movie.writer,
+            'trailer' : trailer_url
         }
         
         li.setInfo('video', info)

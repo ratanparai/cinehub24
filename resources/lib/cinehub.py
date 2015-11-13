@@ -72,7 +72,8 @@ class cinehub:
                     year integer,
                     writer text,
                     director text,
-                    castandrole text
+                    castandrole text,
+                    trailer text
                 )''')
             
             # commit change
@@ -114,6 +115,8 @@ class cinehub:
         # list of threads
         threads = []
         
+        # send a number with the thread for sorting 
+        i = 1
         for movieBox in movieBoxs:
             # movie link 
             movieLink = movieBox.find('div', attrs={'class' : 'movie-list-des'}).find('a')
@@ -124,22 +127,25 @@ class cinehub:
             movieTitle = movieLink.find('b').string
             
             # start thread job
-            t = threading.Thread(target=self.worker, args=(movieTitle, links, session))
+            t = threading.Thread(target=self.worker, args=(movieTitle, links, session, i))
             
             # append to threads so that can be stopped later
             threads.append(t)
             
             # start thread
             t.start()
+            
+            # increment the value of i for next number
+            i = i + 1
         
         # stop thread job
         for t in threads:
             t.join() 
                 
+        
+        return sorted(self.movieList, key=lambda movieinfo: movieinfo.sortid)
     
-        return self.movieList
-    
-    def worker(self, name, url, session):
+    def worker(self, name, url, session, sortid):
         # get cursor
         dbcon = sqlite3.connect(self.dburl)
         dbcur = dbcon.cursor()
@@ -161,6 +167,10 @@ class cinehub:
         
         # add previously resolved url to the list
         mMovieInfo.url = resolvedUrl
+        
+        # add sortid to movie to sort the movie after exiting the thread
+        mMovieInfo.sortid = sortid
+        
         # if movie info have no imdb id then return
         if mMovieInfo.imdbid:
             # add the movieino object to the movie list
@@ -211,7 +221,7 @@ class cinehub:
                 # video file format mp4, avi and mkv and not containing sample
                 if link.lower().endswith(('mp4' , 'avi' , 'mkv')) :
                     if link.lower().find("sample") != -1 or link.lower().find("trailer") != -1 :
-                        pass
+                        tdId += 5
                     else:
                         print "inserting into database"
                         t = (URL, link)
@@ -267,4 +277,5 @@ class cinehub:
         return session_requests
     
             
+    
         
