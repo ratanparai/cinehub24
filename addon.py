@@ -34,19 +34,31 @@ from resources.lib.tmdbscraper import tmdbscraper
 addon_handle = int(sys.argv[1])
 __url__ = sys.argv[0]
 
+# get addon path
+addonInfo = xbmcaddon.Addon().getAddonInfo
+addonPath = xbmc.translatePath(addonInfo('path'))
+# get to media path
+artPath = os.path.join(addonPath, 'resources', 'media')
+
 def showCatagoryList():
     listing = []
+    
+   
     
     #Recent movie list
     listItem = xbmcgui.ListItem(label="Recent movies")
     url = '{0}?action=recentMovies'.format(__url__)
     is_folder = True
+    # set thumb image
+    listItem.setArt({'thumb' : os.path.join(artPath, 'movies.jpg') })
     listing.append((url, listItem, is_folder))
     
     # Search list
     listItem = xbmcgui.ListItem(label="Search Movies")
     url = '{0}?action=search&query='.format(__url__)
     is_folder = True
+    # set thumb image
+    listItem.setArt({'thumb' : os.path.join(artPath, 'search.jpg') })
     listing.append((url, listItem, is_folder))
     
     xbmcplugin.addDirectoryItems(addon_handle, listing, len(listing))
@@ -161,6 +173,7 @@ def showMoviesList(page=1):
     newStrPage = str(new_page)
     url = '{0}?action=recentMoviesWithPage&page={1}'.format(__url__, newStrPage)
     li = xbmcgui.ListItem(label="Next Page")
+    li.setArt({'thumb' : os.path.join(artPath, 'next.jpg') })
     listing.append((url, li, True))
     
     
