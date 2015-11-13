@@ -82,11 +82,11 @@ def showSearchResult(listOfMovies):
             'mediatype' : 'movie',
             'code' : movie.imdbid,
             'plot' : movie.overview,
-            'rating' : movie.totalVote,
+            'rating' : movie.rating,
             'tagline' : movie.tagline,
             'duration' : movie.runtime,
             'premiered' : movie.releaseDate,
-            'votes' : movie.rating,
+            'votes' : movie.totalVote,
             'castandrole' : movie.castandrole,
             'director' : movie.director,
             'writer' : movie.writer
@@ -98,6 +98,7 @@ def showSearchResult(listOfMovies):
         
         # Add to library context menu
         cm = [] 
+        cm.append(('Movie Informatiom', 'Action(Info)'))
         msg = 'RunPlugin({0}?action=addToLibrary&title={1}&year={2}&url={3})'.format(__url__,  urllib.quote_plus(movie.title), movie.year, movie.url)
         print "plugin.video.cinehub: " + msg
         cm.append(('Add To Library', msg))
@@ -160,6 +161,7 @@ def showMoviesList(page=1):
         
         # add contex menu
         cm =[]
+        cm.append(('Movie Informatiom', 'Action(Info)'))
         msg = 'RunPlugin({0}?action=addToLibrary&imdbid={1}&title={2}&year={3}&url={4})'.format(__url__, movie.imdbid, urllib.quote_plus(movie.title), movie.year, movie.url)
         cm.append(('Add To Library', msg))
         li.addContextMenuItems(cm, False)
