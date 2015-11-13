@@ -1,3 +1,7 @@
+v1.2.0
+- The addon is getting faster and responce time is getting lower :p
+- implemented cache so that you can remember movie information in lightning speed. But don't try to break the sound barrier, you are not quite ready yet!
+
 v1.1.12
 - better movie recognition
 

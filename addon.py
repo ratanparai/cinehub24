@@ -110,10 +110,17 @@ def showMoviesList(page=1):
     
         url = '{0}?action=play&video={1}'.format(__url__, movie.url)
         
-        li = xbmcgui.ListItem(label=movie.title, thumbnailImage=movie.posterImage)
         
+        bPosterImage =  "https://image.tmdb.org/t/p/w396" + movie.posterImage
+        bBackdropImage = "https://image.tmdb.org/t/p/w780" + movie.backdropImage
         
-        li.setArt({ 'poster': movie.posterImage, 'fanart' : movie.backdropImage, 'thumb' : movie.posterImage })
+        sPosterImage = "https://image.tmdb.org/t/p/w185" + movie.posterImage
+        
+        print "sPosterImage: " +  sPosterImage
+        
+        li = xbmcgui.ListItem(label=movie.title, thumbnailImage=sPosterImage)
+        
+        li.setArt({ 'poster': bPosterImage, 'fanart' : bBackdropImage, 'thumb' : sPosterImage })
         
         info = {
             'genre': movie.genres,
@@ -139,7 +146,7 @@ def showMoviesList(page=1):
         
         # add contex menu
         cm =[]
-        msg = 'RunPlugin({0}?action=addToLibrary&title={1}&year={2}&url={3})'.format(__url__,  urllib.quote_plus(movie.title), movie.year, movie.url)
+        msg = 'RunPlugin({0}?action=addToLibrary&imdbid={1}&title={2}&year={3}&url={4})'.format(__url__, movie.imdbid, urllib.quote_plus(movie.title), movie.year, movie.url)
         cm.append(('Add To Library', msg))
         li.addContextMenuItems(cm, False)
         
@@ -190,20 +197,24 @@ def router(paramstring):
             
         elif params['action'] == 'playStream':
             print "all params : " + params['title']
-            play_stream(params['title'], params['year'], params['video'])
+            
+            if params.has_key('imdbid'):
+                play_stream(params['title'], params['year'], params['video'], params['imdbid'])
+            else:
+                play_stream(params['title'], params['year'], params['video'])
             
         elif params['action']=='recentMoviesWithPage':
             showMoviesList(params['page'])
             
         elif params['action'] == 'addToLibrary':
             print "plugin.video.cinehub: " + params['title']
-            addMovieToLibrary(params['title'], params['year'], params['url'])
+            addMovieToLibrary(params['title'], params['year'], params['url'], params['imdbid'])
             
     else:
 
         showCatagoryList()
         
-def addMovieToLibrary(title, year , url):
+def addMovieToLibrary(title, year , url, imdbid):
     
     # get movie folder location
     # 
@@ -211,7 +222,6 @@ def addMovieToLibrary(title, year , url):
     # xbmc.translatePath() is used for translating "speciall://sample" path to full path for writing to disk
     # xbmcaddon.Addon().getSetting('id') is for reading movie libray info from setting
     library_folder = os.path.join(xbmc.translatePath(xbmcaddon.Addon().getSetting('movie_library')))
-    print "Movie library path: " + library_folder
     
     # make movie directory if not already created
     xbmcvfs.mkdir(library_folder)
@@ -230,7 +240,7 @@ def addMovieToLibrary(title, year , url):
     
     file = xbmcvfs.File(movie_file, 'w')
     
-    content = '%s?action=playStream&title=%s&year=%s&video=%s' % (__url__, urllib.quote_plus(title), year, url)
+    content = '%s?action=playStream&imdbid=%s&title=%s&year=%s&video=%s' % (__url__, imdbid, urllib.quote_plus(title), year, url)
     
     file.write(str(content))
     
@@ -247,7 +257,7 @@ def play_video(path):
     # Pass the item to the Kodi player.
     xbmcplugin.setResolvedUrl(addon_handle, True, listitem=play_item)
     
-def play_stream(title, year, path):
+def play_stream(title, year, path, imdbid=''):
     
     # get movie info
     mInfo = movieinfo()
@@ -256,7 +266,13 @@ def play_stream(title, year, path):
     name = '%s (%s)' % (title, str(year))
     
     scrobber = tmdbscraper()
-    movie = scrobber.getMovieInfo(name)
+    
+    print "imdbid from play_stream " + imdbid
+    
+    if imdbid:
+        movie = scrobber.getMovieInfo(name, imdbid=imdbid)
+    else:
+        movie = scrobber.getMovieInfo(name)
     
     info = {
             'genre': movie.genres,
@@ -274,12 +290,17 @@ def play_stream(title, year, path):
             'director' : movie.director,
             'writer' : movie.writer
         }
-    play_item = xbmcgui.ListItem(label=movie.title, thumbnailImage=movie.posterImage, path=path)
+    
+    sPosterImage = "https://image.tmdb.org/t/p/w185" + movie.posterImage
+    
+    print "sPosterImage url while playing: " + sPosterImage
+    
+    play_item = xbmcgui.ListItem(label=movie.title, thumbnailImage=sPosterImage, path=path)
     
     play_item.setInfo('video', info)
     
     
-    play_item.setArt({'thumb' : movie.posterImage })
+    play_item.setArt({'thumb' : sPosterImage })
     
     # Pass the item to the Kodi player.
     xbmcplugin.setResolvedUrl(addon_handle, True, listitem=play_item)

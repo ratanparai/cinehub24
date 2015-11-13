@@ -24,11 +24,20 @@ from movieinfo import movieinfo
 import re
 import urllib
 import base64
-
+import os
+import xbmc
+import sqlite3
 
 class tmdbscraper:
     
+    # path to database
+    dburl = urldb = os.path.join(xbmc.translatePath("special://userdata/addon_data/plugin.video.cinehub/cinehubdb.db"))
+    
     API = base64.urlsafe_b64decode("N2U5MTYyMjM1NWFjZjI3NDM3ODQzNjcyMzRlOTFhODU=")
+    
+    def __init__(self):
+        self.dbcon = sqlite3.connect(self.dburl)
+        self.dbcur = self.dbcon.cursor()
     
     def searchMovie(self, name, year=""):
         URL = "http://api.themoviedb.org/3/search/movie?api_key="+self.API+"&query=" + urllib.quote_plus(name) + "&year=" + str(year)
@@ -40,7 +49,65 @@ class tmdbscraper:
         
         return moviejson['results'][0]['id']
     
-    def getMovieInfo(self, name):
+    def getMovieInfoFromCache(self, res):
+        '''
+        return movieinfo object created from database result
+        '''
+        
+        print "return movieinfo object"
+        
+        result = []
+        for m in res:
+            result.append(m)
+        
+        
+        myMovieInfo = movieinfo()
+        
+        myMovieInfo.title = result[1]
+        myMovieInfo.imdbid = result[2]
+        myMovieInfo.genres = result[3]
+        myMovieInfo.rating = result[4]
+        myMovieInfo.runtime = result[5]
+        myMovieInfo.tagline = result[6]
+        myMovieInfo.totalVote = result[7]
+        myMovieInfo.releaseDate = result[8]
+        myMovieInfo. overview = result[9]
+        myMovieInfo.posterImage = result[10]
+        myMovieInfo.backdropImage = result[11]
+        myMovieInfo.year = result[12]
+        myMovieInfo.writer = result[13]
+        myMovieInfo.director = result[14]
+        myMovieInfo.castandrole = eval(result[15])
+        
+        return myMovieInfo
+    
+    def getMovieInfo(self, name, imdbid='', videoUrl=''):
+        # check if the info is available in cache
+        print "checking if imdbid is provided..."
+        print "imdbid = " + imdbid
+        if imdbid:
+            print "got imdbid"
+            t = (imdbid,)
+            searchQuery = "SELECT * FROM movie_info WHERE imdbid = ?"
+            self.dbcur.execute(searchQuery, t )
+            result =self.dbcur.fetchone()
+            
+            if result:
+                return self.getMovieInfoFromCache(result)
+        
+        print "no imdbid provided."
+        print "check if videoUrl is provided"
+        if videoUrl:
+            print "got videoUrl: " + videoUrl
+            t = (videoUrl, )
+            searchQuery = "SELECT * FROM movie_info WHERE url = ?"
+            self.dbcur.execute(searchQuery, t)
+            result =self.dbcur.fetchone()
+            print "check if match found"
+            if result:
+                print "match found with the name of movie : " + name
+                return self.getMovieInfoFromCache(result)
+        
         # create movieinfo object to return
         myMovieInfo = movieinfo()
         
@@ -69,6 +136,18 @@ class tmdbscraper:
             searchYear = m.group(0)
         else:
             searchYear = ""
+            
+        # check if any movie info is avaiable in name, year pair
+        # if year is available for better recognition
+        if searchYear != "":
+            print "searchYear: " + searchYear
+            t = (searchName, searchYear)
+            searchQuery = "SELECT * FROM movie_info WHERE title=? AND year=?"
+            self.dbcur.execute(searchQuery, t)
+            result =self.dbcur.fetchone()
+            if result:
+                return self.getMovieInfoFromCache(result)
+            
             
         # invoke search
         movieId = self.searchMovie(searchName, searchYear)
@@ -107,11 +186,11 @@ class tmdbscraper:
         myMovieInfo.genres =  genres
         
         try:
-            myMovieInfo.posterImage = "https://image.tmdb.org/t/p/w396" + mJson['poster_path']
+            myMovieInfo.posterImage = mJson['poster_path']
         except:
             pass
         try:
-            myMovieInfo.backdropImage = "https://image.tmdb.org/t/p/w780" + mJson['backdrop_path']
+            myMovieInfo.backdropImage = mJson['backdrop_path']
         except: 
             pass
         
@@ -121,18 +200,40 @@ class tmdbscraper:
         except:
             pass
         
-        listCast = cJson['cast']
+        if cJson.has_key('cast'):
+            listCast = cJson['cast']
+            
+            castName = []
+            castChar = []
+            for cast in listCast:
+                name = cast['name']
+                castName.append(name)
+                character = cast['character']
+                castChar.append(character)
+            
+            myMovieInfo.castandrole = zip(castName, castChar)
         
-        castName = []
-        castChar = []
-        for cast in listCast:
-            name = cast['name']
-            castName.append(name)
-            character = cast['character']
-            castChar.append(character)
-        
-        myMovieInfo.castandrole = zip(castName, castChar)
+        self.saveMovieCache(myMovieInfo, videoUrl)
         
         return myMovieInfo
+    
+    def saveMovieCache(self, myMovieInfo, url):
+        print "save movie info to database"
+        t = (url ,myMovieInfo.title ,myMovieInfo.imdbid ,str(myMovieInfo.genres) ,myMovieInfo.rating ,myMovieInfo.runtime ,myMovieInfo.tagline ,myMovieInfo.totalVote ,myMovieInfo.releaseDate ,myMovieInfo.overview ,myMovieInfo.posterImage ,myMovieInfo.backdropImage ,myMovieInfo.year ,myMovieInfo.writer ,myMovieInfo.director , str(myMovieInfo.castandrole))
+        insertQuery = '''INSERT INTO movie_info
+                    (url ,title ,imdbid ,genres ,rating ,runtime ,tagline ,totalVote ,releaseDate ,overview ,posterImage ,backdropImage ,year ,writer ,director ,castandrole)
+                VALUES
+                    (? , ? , ? , ? , ? , ? , ? , ? , ? , ?, ? , ?, ?, ?, ? , ?)
+                    '''
+        self.dbcon.text_factory = str
+        self.dbcur.execute(insertQuery, t)
+        
+        self.dbcon.commit()
+    
+    def __del__(self):
+        try:
+            self.dbcon.close()
+        except:
+            pass
             
     
