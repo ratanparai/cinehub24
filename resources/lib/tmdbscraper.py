@@ -163,6 +163,8 @@ class tmdbscraper:
         
         TRAILER_URL = "http://api.themoviedb.org/3/movie/%s/videos?api_key=%s" %(str(movieId), self.API)
         
+        
+        
         result = urlopen(DETAIL_URL)
         mJson = json.load(result)
         
@@ -175,8 +177,8 @@ class tmdbscraper:
         # encode strings to "utf-8" becuase kodi give error while showing unicode character
         myMovieInfo.title =  mJson['title'].encode('utf-8')
         myMovieInfo.imdbid = mJson['imdb_id'].encode('utf-8')
-        myMovieInfo.totalVote =  mJson['vote_average'] #rating
-        myMovieInfo.rating = mJson['vote_count']
+        myMovieInfo.rating =  mJson['vote_average'] #rating
+        myMovieInfo.totalVote = mJson['vote_count']
         myMovieInfo.overview =  mJson['overview'].encode('utf-8')
         myMovieInfo.runtime = mJson['runtime'] * 60
         myMovieInfo.tagline = mJson['tagline'].encode('utf-8') #short description
@@ -184,6 +186,17 @@ class tmdbscraper:
         tYear = mJson['release_date'].encode('utf-8')
         myMovieInfo.year = tYear[0:4]
 
+        # get imdb rating 
+        try:
+            OMDB_URL = "http://www.omdbapi.com/?i=%s&plot=short&r=json" % myMovieInfo.imdbid
+            omdbResult = urlopen(OMDB_URL)
+            oJson = json.load(omdbResult) 
+            
+            if oJson['imdbVotes'] != 'N/A' and myMovieInfo.totalVote < oJson['imdbVotes']:
+                myMovieInfo.rating =  oJson['imdbRating'] #rating
+                myMovieInfo.totalVote = oJson['imdbVotes']
+        except:
+            pass
         gList = []
         for genre in mJson['genres'] :
             gList.append(genre['name'].encode('utf-8'))
