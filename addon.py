@@ -72,8 +72,17 @@ def showSearchResult(listOfMovies):
     print len(listOfMovies)
     for movie in listOfMovies:
         url = '{0}?action=play&video={1}'.format(__url__, movie.url)
-        li = xbmcgui.ListItem(label=movie.title, thumbnailImage=movie.posterImage)
-        li.setArt({ 'poster': movie.posterImage, 'fanart' : movie.backdropImage, 'thumb' : movie.posterImage })
+        bPosterImage =  "https://image.tmdb.org/t/p/w396%s" % movie.posterImage
+        bBackdropImage = "https://image.tmdb.org/t/p/w780%s" % movie.backdropImage
+        sPosterImage = "https://image.tmdb.org/t/p/w185%s" % movie.posterImage
+        
+        trailer_url = ''
+        if movie.trailer:
+            trailer_url = 'plugin://plugin.video.youtube/play/?video_id=%s' % movie.trailer 
+        
+        li = xbmcgui.ListItem(label=movie.title, thumbnailImage=sPosterImage)
+        
+        li.setArt({ 'poster': bPosterImage, 'fanart' : bBackdropImage, 'thumb' : sPosterImage })
         
         info = {
             'genre': movie.genres,
