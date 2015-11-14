@@ -30,6 +30,7 @@ import xbmcaddon
 import os
 import xbmcvfs
 from resources.lib.tmdbscraper import tmdbscraper
+import sqlite3
 
 addon_handle = int(sys.argv[1])
 __url__ = sys.argv[0]
@@ -103,6 +104,37 @@ def showSearchResult(listOfMovies):
         
         li.setInfo('video', info)
         
+        # add video info if available 
+        
+        # from database myvideos93 table files get id_file
+        # stream details idFile search and check if iVideoWidth has any value
+        # database location: userdata/database
+        hasResolutionData = 0
+        
+        dburl = urldb = os.path.join(xbmc.translatePath("special://userdata/Database/MyVideos93.db"))
+        dbcon = sqlite3.connect(dburl)
+        dbcur = dbcon.cursor()
+        
+        searchUrl = "plugin://plugin.video.cinehub/?action=play&video=%s" % movie.url
+        dbcur.execute("SELECT * FROM files WHERE strFilename = ? " , (searchUrl,))
+        result = dbcur.fetchone()
+        if result:
+            idFile = result[0]
+            print "idFile is " + str(idFile)
+            dbcur.execute("SELECT * FROM streamdetails WHERE idFile = ? " , (idFile,))
+            fResult = dbcur.fetchone()
+            if fResult:
+                iStreamType = fResult[1]
+                if iStreamType == 0:
+                    hasResolutionData = 1
+                    print "Found video resolution info for moovie : " + movie.title
+                
+        if hasResolutionData == 0:
+            if movie.url.find('720p') != -1 :
+                li.addStreamInfo('video', { 'width' : 1280 , 'height': 720 })
+            if movie.url.find('1080p') != -1:
+                li.addStreamInfo('video', { 'width' : 1920 , 'height': 1080 })
+        
         li.setProperty('IsPlayable', 'true')
         
         # add contex menu
@@ -163,6 +195,37 @@ def showMoviesList(page=1):
         }
         
         li.setInfo('video', info)
+        
+        # add video info if available 
+        
+        # from database myvideos93 table files get id_file
+        # stream details idFile search and check if iVideoWidth has any value
+        # database location: userdata/database
+        hasResolutionData = 0
+        
+        dburl = urldb = os.path.join(xbmc.translatePath("special://userdata/Database/MyVideos93.db"))
+        dbcon = sqlite3.connect(dburl)
+        dbcur = dbcon.cursor()
+        
+        searchUrl = "plugin://plugin.video.cinehub/?action=play&video=%s" % movie.url
+        dbcur.execute("SELECT * FROM files WHERE strFilename = ? " , (searchUrl,))
+        result = dbcur.fetchone()
+        if result:
+            idFile = result[0]
+            print "idFile is " + str(idFile)
+            dbcur.execute("SELECT * FROM streamdetails WHERE idFile = ? " , (idFile,))
+            fResult = dbcur.fetchone()
+            if fResult:
+                iStreamType = fResult[1]
+                if iStreamType == 0:
+                    hasResolutionData = 1
+                    print "Found video resolution info for moovie : " + movie.title
+                
+        if hasResolutionData == 0:
+            if movie.url.find('720p') != -1 :
+                li.addStreamInfo('video', { 'width' : 1280 , 'height': 720 })
+            if movie.url.find('1080p') != -1:
+                li.addStreamInfo('video', { 'width' : 1920 , 'height': 1080 })
         
         li.setProperty('IsPlayable', 'true')
         

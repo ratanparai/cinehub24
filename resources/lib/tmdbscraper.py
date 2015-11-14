@@ -63,7 +63,7 @@ class tmdbscraper:
         
         myMovieInfo = movieinfo()
         
-        myMovieInfo.title = result[1]
+        myMovieInfo.title = result[1].encode('utf-8')
         myMovieInfo.imdbid = result[2]
         myMovieInfo.genres = result[3]
         myMovieInfo.rating = result[4]
