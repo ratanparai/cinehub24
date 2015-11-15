@@ -61,6 +61,14 @@ def showCatagoryList():
     # set thumb image
     listItem.setArt({'thumb' : os.path.join(artPath, 'search.jpg') })
     listing.append((url, listItem, is_folder))
+
+    #Update Library
+    listItem = xbmcgui.ListItem(label="Update Library")
+    url = '{0}?action=updateLibrary'.format(__url__)
+    is_folder = True
+    # set thumb image
+    listItem.setArt({'thumb' : os.path.join(artPath, 'update.jpg') })
+    listing.append((url, listItem, is_folder))
     
     xbmcplugin.addDirectoryItems(addon_handle, listing, len(listing))
     
@@ -307,6 +315,11 @@ def router(paramstring):
         elif params['action'] == 'addToLibrary':
             print "plugin.video.cinehub: " + params['title']
             addMovieToLibrary(params['title'], params['year'], params['url'], params['imdbid'])
+
+        elif params['action'] =='updateLibrary':
+            if not xbmc.getCondVisibility('Library.IsScanningVideo'):
+                xbmc.executebuiltin('UpdateLibrary(video)')
+
             
     else:
 
