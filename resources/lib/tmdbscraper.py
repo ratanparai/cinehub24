@@ -125,6 +125,8 @@ class tmdbscraper:
         name = name.replace("_", " ")
         name = name.replace("{", "")
         name = name.replace("}", "")
+        name = name.replace("720p", "")
+        name = name.replace("1080p", "")
         
         mgroup = re.split('[0-9]{4}', name)
     

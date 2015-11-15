@@ -258,7 +258,17 @@ def router(paramstring):
 
     # Parse a URL-encoded paramstring to the dictionary of
     # {<parameter>: <value>} elements
+
     params = dict(parse_qsl(paramstring[1:]))
+
+    print "My sense are tickling.. Getting actions... Action received. Action = " + str(params)
+
+    try:
+        searchQuery = params['query']
+    except:
+        searchQuery = ''
+    if searchQuery:
+        print "WOOOOOOOOOOOOOOOOOOOOOOOOO. GOD SEARCH QUERY ====== %s" % searchQuery
 
     # Check the parameters passed to the plugin
     if params:
@@ -278,7 +288,7 @@ def router(paramstring):
                 mInfo = mHub.getSearchedMovieList(query)
                 showSearchResult(mInfo)
             except:
-                return
+                pass
                 
         elif params['action'] == 'play':
             play_video(params['video'])
@@ -336,6 +346,9 @@ def addMovieToLibrary(title, year , url, imdbid):
     
     dialog = xbmcgui.Dialog()
     dialog.notification('Movie Added to library', title + " was added to library", xbmcgui.NOTIFICATION_INFO, 5000)
+
+    #if not xbmc.getCondVisibility('Library.IsScanningVideo'):
+    #    xbmc.executebuiltin('UpdateLibrary(video)')
     
   
 def play_video(path):
