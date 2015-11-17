@@ -1,3 +1,10 @@
+v1.3.1
+- Added thumb images for folders and next button while browsing movies
+- Now the addon fetch movie rating from IMDB
+- added movie information context menu so that you can view movie information without pressing "i" button
+- Shows movie quality when available (have 720p or 1080p with the file name)
+- Added library update button
+
 v1.2.1
 - fix a bug where movie is not detected properly if it found sample or trailer clip at first
 - Movies are now sorted properly. No more jumping possition
